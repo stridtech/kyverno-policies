@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-two
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+      annotations:
+        prometheus.io/scrape: "false"
+        prometheus.io/path: ""
+        prometheus.io/port: ""
+    spec:
+      containers:
+        - name: nginx
+          image: nginx

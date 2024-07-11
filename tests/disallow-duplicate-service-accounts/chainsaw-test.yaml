@@ -1,0 +1,46 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: disallow-duplicate-service-accounts
+spec:
+  steps:
+    - try:
+        # create a local cluster
+        - script:
+            timeout: 1m
+            content: |
+              kind create cluster --name dynamic --kubeconfig ./dynamic
+        # first operation: create the deployments
+        - apply:
+            file: resources/service-account.yaml
+        - apply:
+            file: resources/deployment-one.yaml
+        # second operation: verify only one deployment got created
+        - assert:
+            file: assert-resources.yaml
+        - apply:
+            file: resources/deployment-two.yaml
+            expect:
+              - match:
+                  apiVersion: apps/v1
+                  kind: Deployment
+                # an error is expected, this will:
+                # - succeed if the operation failed
+                # - fail if the operation succeeded
+                check:
+                  ($error != null): true
+        - assert:
+            file: assert-resources.yaml
+      catch:
+        - get:
+            apiVersion: v1
+            kind: Deployment
+      # add cluster deletion script in the `finally` block
+      # to guarantee the cluster will be deleted after the test
+      finally:
+        - script:
+            content: |
+              kind delete cluster --name dynamic
+        - script:
+            content: |
+              rm -f ./dynamic

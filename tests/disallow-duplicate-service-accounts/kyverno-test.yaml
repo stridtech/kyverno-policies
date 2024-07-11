@@ -1,0 +1,20 @@
+name: test-disallow-duplicate-service-accounts
+policies:
+  - ../disallow-duplicate-service-accounts.yaml
+resources:
+  - resources/service-account.yaml
+  - resources/deployment-one.yaml
+  - resources/deployment-two.yaml
+results:
+  - policy: disallow-duplicate-service-accounts
+    rule: unique-service-account-per-deployment
+    resource: deployment-one
+    namespace: default
+    kind: Deployment
+    status: fail
+  - policy: disallow-duplicate-service-accounts
+    rule: unique-service-account-per-deployment
+    resource: deployment-two
+    namespace: default
+    kind: Deployment
+    status: fail

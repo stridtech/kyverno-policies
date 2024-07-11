@@ -1,0 +1,29 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: test-enforce-prometheus-annotation
+policies:
+  - ../../policies/enforce-prometheus-annotation.yaml
+resources:
+  - resources/deployment-1.yaml
+  - resources/deployment-2.yaml
+  - resources/deployment-3.yaml
+results:
+  - kind: Deployment
+    policy: enforce-prometheus-annotation
+    rule: check-for-true-scrape-annotation
+    resource: deployment-one
+    namespace: default
+    status: pass
+  - kind: Deployment
+    policy: enforce-prometheus-annotation
+    rule: check-for-true-scrape-annotation
+    resource: deployment-two
+    namespace: default
+    status: pass
+  - kind: Deployment
+    policy: enforce-prometheus-annotation
+    rule: check-for-true-scrape-annotation
+    resource: deployment-three
+    namespace: default
+    status: fail

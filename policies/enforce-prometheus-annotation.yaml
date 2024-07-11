@@ -1,0 +1,37 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-prometheus-annotation
+  annotations:
+    policies.kyverno.io/title: Require Prometheus annotations
+    policies.kyverno.io/category: Other
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Annotation
+    policies.kyverno.io/description: >-
+      This policy validates that the annotations for prometheus are set.
+spec:
+  background: true
+  validationFailureAction: Enforce
+  rules:
+    - name: check-for-true-scrape-annotation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: >-
+          Must set a prometheus annotation, example for allowing metrics scraping:
+          "prometheus.io/scrape": "true"
+          "prometheus.io/path": "/metrics"
+          "prometheus.io/port": "8080"
+          To disable scraping use the following:
+          "prometheus.io/scrape": "false"
+          "prometheus.io/path": ""
+          "prometheus.io/port": ""
+        pattern:
+          metadata:
+            annotations:
+              prometheus.io/scrape: "true|false"
+              prometheus.io/path: "?*|"
+              prometheus.io/port: "?*|"
